@@ -7,7 +7,7 @@ import { UserButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useState } from "react";
-import AddNoteDialog from "@/components/AddNoteDialog";
+import AddEditNoteDialog from "@/components/AddEditNoteDialog";
 
 export default function NavBar() {
   const [showAddNoteDialog, setShowAddNoteDialog] = useState(false);
@@ -34,7 +34,10 @@ export default function NavBar() {
           </div>
         </div>
       </div>
-      <AddNoteDialog open={showAddNoteDialog} setOpen={setShowAddNoteDialog} />
+      <AddEditNoteDialog
+        open={showAddNoteDialog}
+        setOpen={setShowAddNoteDialog}
+      />
     </>
   );
 }
