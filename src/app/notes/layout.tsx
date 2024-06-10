@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
+import { Metadata } from "next";
 import NavBar from "./NavBar";
 
-// export const metadata: Metadata = {
-//   title: "MemoMind",
-//   description: "The AI Notes Application",
-// };
+export const metadata: Metadata = {
+  title: "MemoMind",
+  description: "The AI Memo Application",
+};
 
 export default function RootLayout({
   children,
