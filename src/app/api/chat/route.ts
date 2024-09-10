@@ -1,10 +1,14 @@
 import { notesIndex } from "@/lib/db/pinecone";
 import prisma from "@/lib/db/prisma";
-import openai, { getEmbedding } from "@/lib/openai";
+import { getEmbedding } from "@/lib/huggingface";
 import { auth } from "@clerk/nextjs/server";
 import { OpenAIStream, StreamingTextResponse } from "ai";
-import { ChatCompletionMessage } from "openai/resources/index.mjs";
+import { groq } from "@/lib/groq";
 
+interface ChatCompletionMessage {
+  role: "user" | "assistant" | "system";
+  content: string;
+}
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -32,10 +36,8 @@ export async function POST(req: Request) {
       },
     });
 
-    console.log("Relevant notes found: ", relevantNotes);
-
     const systemMessage: ChatCompletionMessage = {
-      role: "assistant",
+      role: "system",
       content:
         "You are an intelligent note-taking app. You answer the user's question based on their existing notes. " +
         "The relevant notes for this query are:\n" +
@@ -44,10 +46,13 @@ export async function POST(req: Request) {
           .join("\n\n"),
     };
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+    const response = await groq.chat.completions.create({
+      model: "llama3-8b-8192",
       stream: true,
       messages: [systemMessage, ...messagesTruncated],
+      temperature: 0.5,
+      max_tokens: 1024,
+      top_p: 1,
     });
 
     const stream = OpenAIStream(response);

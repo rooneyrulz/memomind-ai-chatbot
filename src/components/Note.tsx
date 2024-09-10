@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "./ui/card";
 import { useState } from "react";
-import AddNoteDialog from "./AddEditNoteDialog";
+import AddEditNoteDialog from "./AddEditNoteDialog";
 
 interface NoteProps {
   note: NoteModel;
@@ -40,7 +40,7 @@ export default function Note({ note }: NoteProps) {
           <p className="whitespace-pre-line">{note.content}</p>
         </CardContent>
       </Card>
-      <AddNoteDialog
+      <AddEditNoteDialog
         open={showEditDialog}
         setOpen={setShowEditDialog}
         noteToEdit={note}

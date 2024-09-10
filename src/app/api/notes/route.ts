@@ -1,6 +1,6 @@
 import { notesIndex } from "@/lib/db/pinecone";
 import prisma from "@/lib/db/prisma";
-import { getEmbedding } from "@/lib/openai";
+import { getEmbedding } from "@/lib/huggingface";
 import {
   createNoteSchema,
   deleteNoteSchema,
@@ -144,5 +144,5 @@ export async function DELETE(req: Request) {
 }
 
 async function getEmbeddingForNote(title: string, content: string | undefined) {
-  return getEmbedding(title + "\n\n" + content ?? "");
+  return getEmbedding(title + "\n\n" + content || "");
 }

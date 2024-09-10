@@ -10,4 +10,6 @@ const pinecone = new Pinecone({
   apiKey,
 });
 
-export const notesIndex = pinecone.Index("memomind");
+// pinecone.listIndexes()
+
+export const notesIndex = pinecone.Index("notes-index-memomind");
