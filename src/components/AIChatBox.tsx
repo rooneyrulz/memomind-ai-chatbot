@@ -5,6 +5,8 @@ import { useChat } from "ai/react";
 import { Bot, Trash, XCircle } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 
@@ -75,7 +77,7 @@ export default function AIChatBox({ open, onClose }: AIChatBoxProps) {
           {!error && messages.length === 0 && (
             <div className="flex h-full items-center justify-center gap-3">
               <Bot />
-              Ask the AI a question about your notes
+              Ask the AI a question about your memo
             </div>
           )}
         </div>
@@ -126,7 +128,7 @@ function ChatMessage({
           isAiMessage ? "bg-background" : "bg-primary text-primary-foreground",
         )}
       >
-        {content}
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
       </p>
       {!isAiMessage && user?.imageUrl && (
         <Image

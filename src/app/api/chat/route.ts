@@ -4,6 +4,7 @@ import { getEmbedding } from "@/lib/huggingface";
 import { auth } from "@clerk/nextjs/server";
 import { OpenAIStream, StreamingTextResponse } from "ai";
 import { groq } from "@/lib/groq";
+import { chatModel, temperature, topK, topP } from "@/config";
 
 interface ChatCompletionMessage {
   role: "user" | "assistant" | "system";
@@ -24,7 +25,7 @@ export async function POST(req: Request) {
 
     const vectorQueryResponse = await notesIndex.query({
       vector: embedding,
-      topK: 4,
+      topK,
       filter: { userId },
     });
 
@@ -39,7 +40,7 @@ export async function POST(req: Request) {
     const systemMessage: ChatCompletionMessage = {
       role: "system",
       content:
-        "You are an intelligent note-taking app. You answer the user's question based on their existing notes. " +
+        "You are an intelligent note-taking assistant. You answer the user's question based on their existing notes. " +
         "The relevant notes for this query are:\n" +
         relevantNotes
           .map((note) => `Title: ${note.title}\n\nContent:\n${note.content}`)
@@ -47,12 +48,11 @@ export async function POST(req: Request) {
     };
 
     const response = await groq.chat.completions.create({
-      model: "llama3-8b-8192",
+      model: chatModel,
       stream: true,
       messages: [systemMessage, ...messagesTruncated],
-      temperature: 0.5,
-      max_tokens: 1024,
-      top_p: 1,
+      temperature,
+      top_p: topP,
     });
 
     const stream = OpenAIStream(response);

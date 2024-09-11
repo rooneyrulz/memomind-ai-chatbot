@@ -4,7 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "MemoMind - Notes",
+  title: "MemoMind - Memo",
 };
 
 export default async function NotesPage() {
@@ -12,7 +12,10 @@ export default async function NotesPage() {
 
   if (!userId) throw Error("UserId undefined!");
 
-  const notes = await prisma.note.findMany({ where: { userId } });
+  const notes = await prisma.note.findMany({
+    where: { userId },
+    orderBy: { updatedAt: "desc" },
+  });
 
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
