@@ -10,6 +10,7 @@ import {
 } from "./ui/card";
 import { useState } from "react";
 import AddEditNoteDialog from "./AddEditNoteDialog";
+import Markdown from "./Markdown";
 
 interface NoteProps {
   note: NoteModel;
@@ -30,14 +31,16 @@ export default function Note({ note }: NoteProps) {
         onClick={() => setShowEditDialog(true)}
       >
         <CardHeader>
-          <CardTitle>{note.title}</CardTitle>
+          <CardTitle>
+            <Markdown>{note.title}</Markdown>
+          </CardTitle>
           <CardDescription>
             {createdUpdatedAtTimestamp}
             {wasUpdated && "(updated)"}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="whitespace-pre-line">{note.content}</p>
+          <Markdown>{note.content}</Markdown>
         </CardContent>
       </Card>
       <AddEditNoteDialog

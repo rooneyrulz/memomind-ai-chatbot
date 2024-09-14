@@ -1,5 +1,5 @@
 import { createNoteSchema } from "@/lib/validation/note";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Dialog,
@@ -17,11 +17,14 @@ import {
   FormMessage,
 } from "./ui/form";
 import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
 import LoadingButton from "./ui/loading-button";
 import { useRouter } from "next/navigation";
 import { Note } from "@prisma/client";
 import { useState } from "react";
+
+import "react-mde/lib/styles/css/react-mde-all.css";
+import ReactMde from "react-mde";
+import * as Showdown from "showdown";
 
 interface AddNoteDialogProps {
   open: boolean;
@@ -29,12 +32,22 @@ interface AddNoteDialogProps {
   noteToEdit?: Note;
 }
 
+const converter = new Showdown.Converter({
+  tables: true,
+  simplifiedAutoLink: true,
+  strikethrough: true,
+  tasklists: true,
+});
+
 export default function AddNoteDialog({
   open,
   setOpen,
   noteToEdit,
 }: AddNoteDialogProps) {
   const [deleteInProgress, setDeleteInProgress] = useState(false);
+  const [selectedTab, setSelectedTab] = useState<
+    "write" | "preview" | undefined
+  >("write");
 
   const router = useRouter();
 
@@ -103,7 +116,7 @@ export default function AddNoteDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent>
+      <DialogContent className="mx-auto max-w-3xl">
         <DialogHeader>
           <DialogTitle>{noteToEdit ? "Edit Note" : "Add Note"}</DialogTitle>
         </DialogHeader>
@@ -122,19 +135,26 @@ export default function AddNoteDialog({
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="content"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Note content</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="Note content" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <FormItem>
+              <FormLabel>Note content</FormLabel>
+              <FormControl>
+                <Controller
+                  control={form.control}
+                  name="content"
+                  render={({ field }) => (
+                    <ReactMde
+                      {...field}
+                      selectedTab={selectedTab}
+                      onTabChange={setSelectedTab}
+                      generateMarkdownPreview={(markdown) =>
+                        Promise.resolve(converter.makeHtml(markdown))
+                      }
+                    />
+                  )}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
             <DialogFooter className="gap-1 sm:gap-0">
               {noteToEdit && (
                 <LoadingButton
