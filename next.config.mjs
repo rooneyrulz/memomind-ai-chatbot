@@ -5,6 +5,7 @@ const nextConfig = {
             hostname: "img.clerk.com",
         }, ],
     },
+    output: "standalone",
 };
 
 export default nextConfig;

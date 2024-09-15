@@ -14,6 +14,7 @@
     "@hookform/resolvers": "^3.4.0",
     "@huggingface/inference": "^2.8.0",
     "@langchain/community": "^0.2.32",
+    "@langchain/ollama": "^0.1.0",
     "@pinecone-database/pinecone": "^2.2.1",
     "@prisma/client": "^5.14.0",
     "@radix-ui/react-dialog": "^1.0.5",

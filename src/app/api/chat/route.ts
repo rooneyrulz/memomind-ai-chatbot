@@ -4,7 +4,8 @@ import { getEmbedding } from "@/lib/huggingface";
 import { auth } from "@clerk/nextjs/server";
 import { OpenAIStream, StreamingTextResponse } from "ai";
 import { groq } from "@/lib/groq";
-import { chatModel, temperature, topK, topP } from "@/config";
+import { topK } from "@/config";
+import { createChatCompletion } from "@/services/chatCompletion";
 
 interface ChatCompletionMessage {
   role: "user" | "assistant" | "system";
@@ -16,26 +17,14 @@ export async function POST(req: Request) {
     const messages: ChatCompletionMessage[] = body.messages;
 
     const messagesTruncated = messages.slice(-6);
+    const queryContent = messagesTruncated
+      .map((message) => message.content)
+      .join("\n");
 
-    const embedding = await getEmbedding(
-      messagesTruncated.map((message) => message.content).join("\n"),
-    );
-
+    const embedding = await getEmbedding(queryContent);
     const { userId } = auth();
 
-    const vectorQueryResponse = await notesIndex.query({
-      vector: embedding,
-      topK,
-      filter: { userId },
-    });
-
-    const relevantNotes = await prisma.note.findMany({
-      where: {
-        id: {
-          in: vectorQueryResponse.matches.map((match) => match.id),
-        },
-      },
-    });
+    const relevantNotes = await retrieveRelevantNotes(userId, embedding);
 
     const systemMessage: ChatCompletionMessage = {
       role: "system",
@@ -47,13 +36,12 @@ export async function POST(req: Request) {
           .join("\n\n"),
     };
 
-    const response = await groq.chat.completions.create({
-      model: chatModel,
-      stream: true,
-      messages: [systemMessage, ...messagesTruncated],
-      temperature,
-      top_p: topP,
-    });
+    const combinedMessages = [systemMessage, ...messagesTruncated];
+
+    const response = await createChatCompletion(
+      groq.chat.completions,
+      combinedMessages,
+    );
 
     const stream = OpenAIStream(response);
     return new StreamingTextResponse(stream);
@@ -61,4 +49,26 @@ export async function POST(req: Request) {
     console.error(error);
     return Response.json({ error: "Internal server error" }, { status: 500 });
   }
+}
+
+async function retrieveRelevantNotes(
+  userId: string | null,
+  embeddings: number[],
+) {
+  const { matches } = await notesIndex.query({
+    vector: embeddings,
+    topK,
+    filter: { userId },
+  });
+
+  const noteIds = matches.map((match) => match.id);
+  const relevantNotes = await prisma.note.findMany({
+    where: {
+      id: {
+        in: noteIds,
+      },
+    },
+  });
+
+  return relevantNotes;
 }
