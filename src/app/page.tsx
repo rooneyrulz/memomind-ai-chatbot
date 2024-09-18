@@ -10,7 +10,7 @@ export default function Home() {
   if (userId) redirect("/notes");
   
   return (
-    <main className="flex h-screen flex-col items-center justify-center gap-5 bg-gradient-to-r from-yellow-400 via-gray-50 to-teal-300">
+    <main className="flex h-screen flex-col items-center justify-center gap-5">
       <div className="flex items-center gap-4">
         <Logo width={100} height={100} />
         <span className="text-4xl font-extrabold tracking-tight lg:text-5xl">
