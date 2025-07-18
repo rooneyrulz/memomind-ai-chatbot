@@ -16,10 +16,16 @@ export async function POST(req: Request) {
     const body = await req.json();
     const messages: ChatCompletionMessage[] = body.messages;
 
+    console.log("MESSAGES:");
+    console.log(messages);
+
     const messagesTruncated = messages.slice(-6);
     const queryContent = messagesTruncated
       .map((message) => message.content)
       .join("\n");
+
+    console.log("TRUNCATED MESSAGES:");
+    console.log(messagesTruncated);
 
     const embedding = await getEmbedding(queryContent);
     const { userId } = auth();
@@ -37,6 +43,9 @@ export async function POST(req: Request) {
     };
 
     const combinedMessages = [systemMessage, ...messagesTruncated];
+
+    console.log("COMBINED MESSAGES");
+    console.log(combinedMessages);
 
     const response = await createChatCompletion(
       groq.chat.completions,
