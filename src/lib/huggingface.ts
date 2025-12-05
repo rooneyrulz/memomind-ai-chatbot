@@ -1,5 +1,5 @@
-import { embeddingModel } from "@/config";
 import { HuggingFaceInferenceEmbeddings } from "@langchain/community/embeddings/hf";
+import { embeddingModel } from "@/config";
 
 const apiKey = process.env.HUGGINGFACEHUB_API_KEY;
 
@@ -8,22 +8,23 @@ if (!apiKey) {
 }
 
 const embeddings = new HuggingFaceInferenceEmbeddings({
-  apiKey, // In Node.js defaults to process.env.HUGGINGFACEHUB_API_KEY
-  // model:"sentence-transformers/all-MiniLM-l6-v2",
-  model: embeddingModel,
+  apiKey, // Defaults to process.env.HUGGINGFACEHUB_API_KEY
+  model: embeddingModel, // Defaults to `BAAI/bge-base-en-v1.5` if not provided
 });
-
-export default embeddings;
 
 export async function getEmbedding(text: string): Promise<number[]> {
   try {
-    // Generate embeddings (assuming method name is embedText)
     const result = await embeddings.embedQuery(text);
 
-    // console.log(result)
+    // Handle different response formats
+    if (Array.isArray(result)) {
+      if (result.length > 0 && Array.isArray(result[0])) {
+        return result[0] as number[];
+      }
+      return result as number[];
+    }
 
-    // Return the embeddings array
-    return result;
+    throw new Error("Unexpected response format from HuggingFace API");
   } catch (error) {
     console.error("Error getting embeddings:", error);
     throw error;
